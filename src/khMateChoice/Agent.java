@@ -9,6 +9,10 @@ import sim.engine.Stoppable;
 import sim.portrayal.simple.OvalPortrayal2D;
 import sim.util.Bag;
 
+// Each Agent has age and environment has a set age range. Done
+// Personality, shy and outgoing, 
+// Gay agent*
+
 public class Agent extends BasicAgent {
 	boolean female;
 	double attractivenessA;
@@ -16,6 +20,7 @@ public class Agent extends BasicAgent {
 	double exponentN;
 	double maxD;
 	double d=0;
+	int age;
 	boolean similar;
 	Stoppable stop;
 	boolean findLocalDate;
@@ -23,9 +28,12 @@ public class Agent extends BasicAgent {
 	boolean replacement;
 	public boolean oneDate;
 	boolean dated = false;
+	boolean personality; // If true then shy otherwise bold.
+	boolean sexuality; // defined by the double value of ratio of agents passed from environment.
 
 	
-	public Agent(BasicEnvironment state, int x, int y, int xdir,int ydir, boolean female, double attractivenessA) {
+	public Agent(BasicEnvironment state, int x, int y, int xdir,int ydir, 
+			boolean female, double attractivenessA, double sexuality) {
 		super(state,x,y);
 		this.x = x;
 		this.y = y;
@@ -44,6 +52,9 @@ public class Agent extends BasicAgent {
 		this.findLocalDate = e.findLocalDate;
 		this.dateSearchRadius = e.dateSearchRadius;
 		this.replacement = e.replacement;
+		this.age = 0;
+		this.personality = Math.random() < 0.5;
+		this.personality = Math.random() < sexuality;
 	}
 	
 	public Agent setColor(Environment state, float red, float green, float blue, float opacity){
@@ -91,40 +102,40 @@ public class Agent extends BasicAgent {
 		
 		int r = state.random.nextInt(dates.numObjs);//start search
 		Agent other = null;
-		for(int i = r;i< dates.numObjs;i++){
+		/**
+		 * Depending on whether the agent is "shy" or bold" search through half the neighbors
+		 * or all of them.
+		 */
+		for(int i = r;i < dates.numObjs / ((this.personality) ? 2 : 1);i++){
 			other = (Agent)dates.objs[i];
-                        if(oneDate && !dated && !other.dated && other.female != this.female){
-                                break;
-                        }
-			else if(other.female != this.female){
-				break;
-			}
-			else{
+			/** Condition for when found dates are of inappropriate age. **/
+			if((oneDate && !dated && !other.dated) || other.female != this.female)
+                break;
+			else
 				other = null;
-			}
 		}
 		if(other == null){
 			for(int i = 0;i< r;i++){
 				other = (Agent)dates.objs[i];
-				if(oneDate && !dated && !other.dated && other.female != this.female){
+				if((oneDate && !dated && !other.dated) || other.female != this.female)
 					break;
-				}
-                else if(other.female != this.female){
-                    break;
-                }
-				else{
+				else
 					other = null;
-				}
 			}
 		}
+		
 		double p1 = 0; //choosing agent
 		double p2 = 0; //selected agent
-                if(other == null){
-                    return;
-                }
 		this.dated = true; //dated this time step
-		other.dated = true;
+		
 		if(other != null){
+			other.dated = true;
+			/** If the agent is deemed homosexual, then they are not considered successful dates.
+			 * 	Serves as a false agent, one which never successfully dates.
+			 */
+			if (other.sexuality)
+				return;
+			
 			if(similar){
 				p1 = chooseSimilar(other);
 				p2 = other.chooseSimilar(this);
@@ -156,6 +167,7 @@ public class Agent extends BasicAgent {
 				//state.correlation.printData();
 			}
 		}
+		this.age++;
 	}
 	
 	

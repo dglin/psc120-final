@@ -19,6 +19,7 @@ public class Environment extends BasicEnvironment {
 	public int dateSearchRadius = 1;
 	public boolean replacement = false;
 	public boolean oneDate = false;
+	public double sexuality = 0.1;
 	
 	public boolean isOneDate() {
 		return oneDate;
@@ -63,6 +64,15 @@ public class Environment extends BasicEnvironment {
 	public void setFemales(int females) {
 		this.females = females;
 	}
+	
+	public double getSexuality() {
+		return sexuality;
+	}
+
+	public void setSexuality(double sexuality) {
+		this.sexuality = sexuality;
+	}
+
 
 	public int getMales() {
 		return males;
@@ -119,7 +129,7 @@ public class Environment extends BasicEnvironment {
 		int xdir =  random.nextInt(3)-1;
 		int ydir =  random.nextInt(3)-1;
 		double attractiveness = (double)random.nextInt((int)scaleK) + 1;
-		Agent a = new Agent(this, x, y,xdir,ydir, female, attractiveness);
+		Agent a = new Agent(this, x, y,xdir,ydir, female, attractiveness, sexuality);
 		place(a);
 		a.stop = schedule.scheduleRepeating(a);
 	}
